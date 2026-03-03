@@ -81,6 +81,13 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 		return value;
 	}
 
+	if (value) {
+		CFTypeRef cfValue = (__bridge CFTypeRef)value;
+		if (CFGetTypeID(cfValue) == CGColorGetTypeID()) {
+			return [UIColor colorWithCGColor:(CGColorRef)cfValue];
+		}
+	}
+
 	if ([value isKindOfClass:[NSString class]]) {
 		UIColor *parsedColor = MGCColorFromHexString(value);
 		if (parsedColor) return parsedColor;
