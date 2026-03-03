@@ -309,7 +309,7 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 								   availableRect.origin.y,
 								   markerWidth,
 								   markerHeight);
-	[[UIColor colorWithRed:0.0 green:0.95 blue:1.0 alpha:1.0] setFill];
+	[[UIColor colorWithRed:1.0 green:0.45 blue:0.0 alpha:1.0] setFill];
 	UIBezierPath *badgePath = [UIBezierPath bezierPathWithRoundedRect:markerRect byRoundingCorners:UIRectCornerBottomLeft cornerRadii:CGSizeMake(3.0, 3.0)];
 	[badgePath fill];
 
