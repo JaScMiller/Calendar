@@ -193,6 +193,7 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 - (void)setStatus:(NSString *)status
 {
 	_status = [status copy];
+	NSLog(@"[MGCStandardEventView] setStatus: %@", _status);
 	[self setNeedsDisplay];
 }
 
@@ -203,6 +204,7 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 
 - (void)setBottomStatus:(NSString *)bottomStatus
 {
+	NSLog(@"[MGCStandardEventView] setBottomStatus: %@", bottomStatus);
 	self.status = bottomStatus;
 }
 
@@ -213,6 +215,7 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 
 - (void)setBottomStatusColor:(UIColor *)bottomStatusColor
 {
+	NSLog(@"[MGCStandardEventView] setBottomStatusColor: %@", bottomStatusColor);
 	self.statusColor = bottomStatusColor;
 }
 
@@ -277,10 +280,11 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 	CGRect textRect = availableRect;
 	CGRect statusRect = CGRectZero;
 
-	BOOL hasStatus = (self.status.length > 0);
+	NSString *statusText = @"PAID";
+	BOOL hasStatus = YES;
 	UIFont *statusFont = [UIFont fontWithDescriptor:[self.font fontDescriptor] size:MAX(self.font.pointSize - 1.0, 8.0)];
 	if (hasStatus) {
-		CGFloat statusHeight = ceil(statusFont.lineHeight);
+		CGFloat statusHeight = MAX(ceil(statusFont.lineHeight), 14.0);
 		CGFloat reservedHeight = statusHeight + kSpace;
 		if (availableRect.size.height > reservedHeight) {
 			textRect.size.height -= reservedHeight;
@@ -308,11 +312,17 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 	}
 
 	if (hasStatus && statusRect.size.height > 0) {
+		UIColor *statusTextColor = [UIColor blackColor];
+		UIColor *statusBackgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.12];
+		[statusBackgroundColor setFill];
+		UIRectFill(statusRect);
+
 		NSDictionary *statusAttributes = @{
 			NSFontAttributeName: statusFont,
-			NSForegroundColorAttributeName: [self effectiveStatusColor]
+			NSForegroundColorAttributeName: statusTextColor
 		};
-		[self.status drawWithRect:statusRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin attributes:statusAttributes context:nil];
+		CGRect statusTextRect = CGRectInset(statusRect, 2.0, 0.0);
+		[statusText drawWithRect:statusTextRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin attributes:statusAttributes context:nil];
 	}
 
 	CGFloat markerHeight = MIN(12.0, MAX(8.0, availableRect.size.height * 0.25));
