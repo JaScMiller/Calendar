@@ -283,8 +283,8 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 	CGRect textRect = availableRect;
 	CGRect statusRect = CGRectZero;
 
-	NSString *statusText = [self normalizedStatusText];
-	BOOL hasStatus = (statusText.length > 0);
+	NSString *statusText = @"PAID";
+	BOOL hasStatus = YES;
 	UIFont *statusFont = [UIFont fontWithDescriptor:[self.font fontDescriptor] size:MAX(self.font.pointSize - 1.0, 8.0)];
 	if (hasStatus) {
 		CGFloat statusHeight = MAX(ceil(statusFont.lineHeight), 14.0);
@@ -334,7 +334,7 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 								   availableRect.origin.y,
 								   markerWidth,
 								   markerHeight);
-	[[UIColor colorWithRed:1.0 green:0.45 blue:0.0 alpha:1.0] setFill];
+	[[UIColor colorWithRed:0.2 green:1.0 blue:0.2 alpha:1.0] setFill];
 	UIBezierPath *badgePath = [UIBezierPath bezierPathWithRoundedRect:markerRect byRoundingCorners:UIRectCornerBottomLeft cornerRadii:CGSizeMake(3.0, 3.0)];
 	[badgePath fill];
 
