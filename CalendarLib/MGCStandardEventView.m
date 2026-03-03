@@ -197,28 +197,6 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 	[self setNeedsDisplay];
 }
 
-- (NSString *)bottomStatus
-{
-	return self.status;
-}
-
-- (void)setBottomStatus:(NSString *)bottomStatus
-{
-	NSLog(@"[MGCStandardEventView] setBottomStatus: %@", bottomStatus);
-	self.status = bottomStatus;
-}
-
-- (UIColor *)bottomStatusColor
-{
-	return self.statusColor;
-}
-
-- (void)setBottomStatusColor:(UIColor *)bottomStatusColor
-{
-	NSLog(@"[MGCStandardEventView] setBottomStatusColor: %@", bottomStatusColor);
-	self.statusColor = bottomStatusColor;
-}
-
 - (UIColor *)effectiveStatusColor
 {
 	if (self.statusColor) {
@@ -280,8 +258,8 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 	CGRect textRect = availableRect;
 	CGRect statusRect = CGRectZero;
 
-	NSString *statusText = @"PAID";
-	BOOL hasStatus = YES;
+	NSString *statusText = self.status;
+	BOOL hasStatus = (statusText.length > 0);
 	UIFont *statusFont = [UIFont fontWithDescriptor:[self.font fontDescriptor] size:MAX(self.font.pointSize - 1.0, 8.0)];
 	if (hasStatus) {
 		CGFloat statusHeight = MAX(ceil(statusFont.lineHeight), 14.0);
