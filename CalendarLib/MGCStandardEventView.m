@@ -196,6 +196,26 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 	[self setNeedsDisplay];
 }
 
+- (NSString *)bottomStatus
+{
+	return self.status;
+}
+
+- (void)setBottomStatus:(NSString *)bottomStatus
+{
+	self.status = bottomStatus;
+}
+
+- (UIColor *)bottomStatusColor
+{
+	return self.statusColor;
+}
+
+- (void)setBottomStatusColor:(UIColor *)bottomStatusColor
+{
+	self.statusColor = bottomStatusColor;
+}
+
 - (UIColor *)effectiveStatusColor
 {
 	if (self.statusColor) {
