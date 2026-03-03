@@ -294,6 +294,23 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 		};
 		[self.status drawWithRect:statusRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin attributes:statusAttributes context:nil];
 	}
+
+	CGFloat markerHeight = MIN(12.0, MAX(8.0, availableRect.size.height * 0.25));
+	CGFloat markerWidth = MIN(30.0, MAX(16.0, availableRect.size.width * 0.35));
+	CGRect markerRect = CGRectMake(CGRectGetMaxX(availableRect) - markerWidth,
+								   availableRect.origin.y,
+								   markerWidth,
+								   markerHeight);
+	[[UIColor colorWithRed:1.0 green:0.0 blue:0.8 alpha:1.0] setFill];
+	UIBezierPath *badgePath = [UIBezierPath bezierPathWithRoundedRect:markerRect byRoundingCorners:UIRectCornerBottomLeft cornerRadii:CGSizeMake(3.0, 3.0)];
+	[badgePath fill];
+
+	NSDictionary *markerAttributes = @{
+		NSFontAttributeName: [UIFont boldSystemFontOfSize:MAX(6.0, markerHeight - 3.0)],
+		NSForegroundColorAttributeName: [UIColor whiteColor]
+	};
+	CGRect markerTextRect = CGRectInset(markerRect, 2.0, 0.0);
+	[@"NEW" drawWithRect:markerTextRect options:NSStringDrawingTruncatesLastVisibleLine attributes:markerAttributes context:nil];
 }
 
 #pragma mark - NSCopying protocol
