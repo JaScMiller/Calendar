@@ -192,9 +192,34 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 
 - (void)setStatus:(NSString *)status
 {
-	_status = [status copy];
+	if ([status isKindOfClass:[NSString class]]) {
+		_status = [status copy];
+	}
+	else if (status) {
+		_status = [[status description] copy];
+	}
+	else {
+		_status = nil;
+	}
 	NSLog(@"[MGCStandardEventView] setStatus: %@", _status);
 	[self setNeedsDisplay];
+}
+
+- (void)setStatusText:(NSString *)statusText
+{
+	[self setStatus:statusText];
+}
+
+- (NSString *)statusText
+{
+	return self.status;
+}
+
+- (NSString *)normalizedStatusText
+{
+	if (![self.status isKindOfClass:[NSString class]]) return nil;
+	NSString *trimmedStatus = [self.status stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	return trimmedStatus.length > 0 ? trimmedStatus : nil;
 }
 
 - (UIColor *)effectiveStatusColor
@@ -258,7 +283,7 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 	CGRect textRect = availableRect;
 	CGRect statusRect = CGRectZero;
 
-	NSString *statusText = self.status;
+	NSString *statusText = [self normalizedStatusText];
 	BOOL hasStatus = (statusText.length > 0);
 	UIFont *statusFont = [UIFont fontWithDescriptor:[self.font fontDescriptor] size:MAX(self.font.pointSize - 1.0, 8.0)];
 	if (hasStatus) {
