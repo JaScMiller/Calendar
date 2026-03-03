@@ -283,7 +283,10 @@ static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
 	CGRect textRect = availableRect;
 	CGRect statusRect = CGRectZero;
 
-	NSString *statusText = @"PAID";
+	NSString *statusText = [self normalizedStatusText];
+	if (statusText.length == 0) {
+		statusText = @"PAID";
+	}
 	BOOL hasStatus = YES;
 	UIFont *statusFont = [UIFont fontWithDescriptor:[self.font fontDescriptor] size:MAX(self.font.pointSize - 1.0, 8.0)];
 	if (hasStatus) {
