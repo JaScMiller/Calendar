@@ -33,6 +33,63 @@
 static CGFloat kSpace = 2;
 
 
+static UIColor *MGCColorFromHexString(NSString *hexString)
+{
+	if (![hexString isKindOfClass:[NSString class]]) return nil;
+
+	NSString *cleanString = [[hexString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] uppercaseString];
+	if ([cleanString hasPrefix:@"#"]) {
+		cleanString = [cleanString substringFromIndex:1];
+	}
+
+	if (cleanString.length == 3) {
+		unichar r = [cleanString characterAtIndex:0];
+		unichar g = [cleanString characterAtIndex:1];
+		unichar b = [cleanString characterAtIndex:2];
+		cleanString = [NSString stringWithFormat:@"%C%C%C%C%C%C", r, r, g, g, b, b];
+	}
+
+	if (cleanString.length != 6 && cleanString.length != 8) return nil;
+
+	unsigned int colorValue = 0;
+	if (![[NSScanner scannerWithString:cleanString] scanHexInt:&colorValue]) return nil;
+
+	CGFloat alpha = 1.0;
+	CGFloat red = 0.0;
+	CGFloat green = 0.0;
+	CGFloat blue = 0.0;
+
+	if (cleanString.length == 8) {
+		alpha = ((colorValue >> 24) & 0xFF) / 255.0;
+		red = ((colorValue >> 16) & 0xFF) / 255.0;
+		green = ((colorValue >> 8) & 0xFF) / 255.0;
+		blue = (colorValue & 0xFF) / 255.0;
+	}
+	else {
+		red = ((colorValue >> 16) & 0xFF) / 255.0;
+		green = ((colorValue >> 8) & 0xFF) / 255.0;
+		blue = (colorValue & 0xFF) / 255.0;
+	}
+
+	return [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
+}
+
+
+static UIColor *MGCResolveColorFromInput(id value, UIColor *fallbackColor)
+{
+	if ([value isKindOfClass:[UIColor class]]) {
+		return value;
+	}
+
+	if ([value isKindOfClass:[NSString class]]) {
+		UIColor *parsedColor = MGCColorFromHexString(value);
+		if (parsedColor) return parsedColor;
+	}
+
+	return fallbackColor;
+}
+
+
 @interface MGCStandardEventView ()
 
 @property (nonatomic) UIView *leftBorderView;
@@ -50,6 +107,7 @@ static CGFloat kSpace = 2;
 		self.contentMode = UIViewContentModeRedraw;
 		
 		_color = [UIColor blackColor];
+		_statusColor = nil;
 		_style = MGCStandardEventViewStylePlain|MGCStandardEventViewStyleSubtitle;
 		_font = [UIFont systemFontOfSize:[UIFont smallSystemFontSize]];
 		_leftBorderView = [[UIView alloc]initWithFrame:CGRectZero];
@@ -115,8 +173,29 @@ static CGFloat kSpace = 2;
 
 - (void)setColor:(UIColor*)color
 {
-	_color = color;
+	_color = MGCResolveColorFromInput(color, [UIColor blackColor]);
 	[self resetColors];
+}
+
+- (void)setStatusColor:(UIColor *)statusColor
+{
+	_statusColor = MGCResolveColorFromInput(statusColor, nil);
+	[self setNeedsDisplay];
+}
+
+- (void)setStatus:(NSString *)status
+{
+	_status = [status copy];
+	[self setNeedsDisplay];
+}
+
+- (UIColor *)effectiveStatusColor
+{
+	if (self.statusColor) {
+		return self.statusColor;
+	}
+
+	return self.selected ? [UIColor whiteColor] : [UIColor blackColor];
 }
 
 - (void)setStyle:(MGCStandardEventViewStyle)style
@@ -165,17 +244,49 @@ static CGFloat kSpace = 2;
 		drawRect.origin.x += kSpace;
 		drawRect.size.width -= kSpace;
 	}
-	
-	[self redrawStringInRect:drawRect];
-	
-	CGRect boundingRect = [self.attrString boundingRectWithSize:CGSizeMake(drawRect.size.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil];
-	drawRect.size.height = fminf(drawRect.size.height, self.visibleHeight);
-	
-	if (boundingRect.size.height > drawRect.size.height) {
-		[self.attrString.mutableString replaceOccurrencesOfString:@"\n" withString:@"  " options:NSCaseInsensitiveSearch range:NSMakeRange(0, self.attrString.length)];
+
+	CGRect availableRect = drawRect;
+	availableRect.size.height = fminf(availableRect.size.height, self.visibleHeight);
+	CGRect textRect = availableRect;
+	CGRect statusRect = CGRectZero;
+
+	BOOL hasStatus = (self.status.length > 0);
+	UIFont *statusFont = [UIFont fontWithDescriptor:[self.font fontDescriptor] size:MAX(self.font.pointSize - 1.0, 8.0)];
+	if (hasStatus) {
+		CGFloat statusHeight = ceil(statusFont.lineHeight);
+		CGFloat reservedHeight = statusHeight + kSpace;
+		if (availableRect.size.height > reservedHeight) {
+			textRect.size.height -= reservedHeight;
+			statusRect = CGRectMake(availableRect.origin.x,
+									CGRectGetMaxY(textRect) + kSpace,
+									availableRect.size.width,
+									statusHeight);
+		}
+		else {
+			textRect.size.height = 0;
+			statusRect = availableRect;
+		}
 	}
 
-	[self.attrString drawWithRect:drawRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin context:nil];
+	[self redrawStringInRect:textRect];
+
+	if (textRect.size.height > 0) {
+		CGRect boundingRect = [self.attrString boundingRectWithSize:CGSizeMake(textRect.size.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil];
+
+		if (boundingRect.size.height > textRect.size.height) {
+			[self.attrString.mutableString replaceOccurrencesOfString:@"\n" withString:@"  " options:NSCaseInsensitiveSearch range:NSMakeRange(0, self.attrString.length)];
+		}
+
+		[self.attrString drawWithRect:textRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin context:nil];
+	}
+
+	if (hasStatus && statusRect.size.height > 0) {
+		NSDictionary *statusAttributes = @{
+			NSFontAttributeName: statusFont,
+			NSForegroundColorAttributeName: [self effectiveStatusColor]
+		};
+		[self.status drawWithRect:statusRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin attributes:statusAttributes context:nil];
+	}
 }
 
 #pragma mark - NSCopying protocol
@@ -186,6 +297,8 @@ static CGFloat kSpace = 2;
 	cell.title = self.title;
 	cell.subtitle = self.subtitle;
 	cell.detail = self.detail;
+	cell.status = self.status;
+	cell.statusColor = self.statusColor;
 	cell.color = self.color;
 	cell.style = self.style;
 	

@@ -58,6 +58,12 @@ typedef NS_OPTIONS(NSUInteger, MGCStandardEventViewStyle) {
 /*! Detail - displayed with a smaller font and right aligned. */
 @property (nonatomic, copy)	NSString *detail;
 
+/*! Optional status string displayed at the bottom of the event rectangle. */
+@property (nonatomic, copy)	NSString *status;
+
+/*! Optional color for status text. Supports UIColor and hex strings via bridge layers. */
+@property (nonatomic) UIColor *statusColor;
+
 /*! The color is used for background or text, depending on the style. */
 @property (nonatomic) UIColor *color;
 
