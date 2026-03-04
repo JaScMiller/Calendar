@@ -61,6 +61,9 @@ typedef NS_OPTIONS(NSUInteger, MGCStandardEventViewStyle) {
 /*! Status of the event - displayed at the bottom of the event view. */
 @property (nonatomic, copy)	NSString *statusString;
 
+/*! Background color of the status badge. Defaults to black. */
+@property (nonatomic) UIColor *statusBadgeColor;
+
 /*! The color is used for background or text, depending on the style. */
 @property (nonatomic) UIColor *color;
 

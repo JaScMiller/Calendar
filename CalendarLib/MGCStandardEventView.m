@@ -44,13 +44,13 @@ static CGFloat kSpace = 2;
 
 @implementation MGCStandardEventView
 
-
 - (instancetype)initWithFrame:(CGRect)frame
 {
     if (self = [super initWithFrame:frame]) {
 		self.contentMode = UIViewContentModeRedraw;
 		
 		_color = [UIColor blackColor];
+		_statusBadgeColor = [UIColor blackColor];
 		_style = MGCStandardEventViewStylePlain|MGCStandardEventViewStyleSubtitle;
 		_font = [UIFont systemFontOfSize:[UIFont smallSystemFontSize]];
 		_leftBorderView = [[UIView alloc]initWithFrame:CGRectZero];
@@ -178,6 +178,12 @@ static CGFloat kSpace = 2;
 	[self setNeedsDisplay];
 }
 
+- (void)setStatusBadgeColor:(UIColor *)statusBadgeColor
+{
+	_statusBadgeColor = statusBadgeColor ?: [UIColor blackColor];
+	[self setNeedsDisplay];
+}
+
 - (void)drawRect:(CGRect)rect
 {
 	CGRect drawRect = CGRectInset(rect, kSpace, 0);
@@ -226,7 +232,7 @@ static CGFloat kSpace = 2;
 	[self.attrString drawWithRect:mainTextRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin context:nil];
 
 	if (self.statusAttrString.length > 0) {
-		[[UIColor blackColor] setFill];
+		[(self.statusBadgeColor ?: [UIColor blackColor]) setFill];
 		UIRectFill(statusBackgroundRect);
 		[self.statusAttrString drawWithRect:statusTextRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin context:nil];
 	}
@@ -241,6 +247,7 @@ static CGFloat kSpace = 2;
 	cell.subtitle = self.subtitle;
 	cell.detail = self.detail;
 	cell.statusString = self.statusString;
+	cell.statusBadgeColor = self.statusBadgeColor;
 	cell.color = self.color;
 	cell.style = self.style;
 	
