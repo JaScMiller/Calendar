@@ -105,15 +105,18 @@ static NSString * const kDebugStatusText = @"PAID";
 	[as addAttribute:NSForegroundColorAttributeName value:color range:NSMakeRange(0, as.length)];
 	
 	self.attrString = as;
-	NSMutableParagraphStyle *statusStyle = [NSMutableParagraphStyle new];
-	statusStyle.alignment = NSTextAlignmentCenter;
-	statusStyle.lineBreakMode = NSLineBreakByTruncatingTail;
-	
-	self.statusAttrString = [[NSAttributedString alloc] initWithString:kDebugStatusText attributes:@{
-		NSFontAttributeName: boldFont ?: self.font,
-		NSForegroundColorAttributeName: [UIColor whiteColor],
-		NSParagraphStyleAttributeName: statusStyle
-	}];
+	self.statusAttrString = nil;
+	if (kDebugStatusText.length > 0) {
+		NSMutableParagraphStyle *statusStyle = [NSMutableParagraphStyle new];
+		statusStyle.alignment = NSTextAlignmentCenter;
+		statusStyle.lineBreakMode = NSLineBreakByTruncatingTail;
+		
+		self.statusAttrString = [[NSAttributedString alloc] initWithString:kDebugStatusText attributes:@{
+			NSFontAttributeName: boldFont ?: self.font,
+			NSForegroundColorAttributeName: [UIColor whiteColor],
+			NSParagraphStyleAttributeName: statusStyle
+		}];
+	}
 }
 
 
@@ -186,28 +189,31 @@ static NSString * const kDebugStatusText = @"PAID";
 	[self redrawStringInRect:drawRect];
 	
 	drawRect.size.height = fminf(drawRect.size.height, self.visibleHeight);
-	
-	CGRect statusBounds = [self.statusAttrString boundingRectWithSize:CGSizeMake(drawRect.size.width, CGFLOAT_MAX)
-															 options:NSStringDrawingUsesLineFragmentOrigin
-															 context:nil];
-	CGFloat statusTextWidth = ceilf(statusBounds.size.width);
-	CGFloat statusTextHeight = ceilf(statusBounds.size.height);
-	CGFloat statusPaddingX = 6.f;
-	CGFloat statusPaddingY = 2.f;
-	CGFloat statusSquareSide = ceilf(MAX(statusTextWidth + statusPaddingX * 2.f, statusTextHeight + statusPaddingY * 2.f));
-	statusSquareSide = fminf(statusSquareSide, fminf(drawRect.size.width, drawRect.size.height));
-	
-	CGRect statusBackgroundRect = CGRectMake(CGRectGetMidX(drawRect) - statusSquareSide * 0.5f,
-											 CGRectGetMaxY(drawRect) - statusSquareSide,
-											 statusSquareSide,
-											 statusSquareSide);
-	CGRect statusTextRect = CGRectMake(CGRectGetMinX(statusBackgroundRect),
-									   CGRectGetMidY(statusBackgroundRect) - statusTextHeight * 0.5f,
-									   CGRectGetWidth(statusBackgroundRect),
-									   statusTextHeight);
-	
+
 	CGRect mainTextRect = drawRect;
-	mainTextRect.size.height = fmaxf(0.f, drawRect.size.height - statusSquareSide - kSpace);
+	CGRect statusBackgroundRect = CGRectZero;
+	CGRect statusTextRect = CGRectZero;
+	if (self.statusAttrString.length > 0) {
+		CGRect statusBounds = [self.statusAttrString boundingRectWithSize:CGSizeMake(drawRect.size.width, CGFLOAT_MAX)
+																 options:NSStringDrawingUsesLineFragmentOrigin
+																 context:nil];
+		CGFloat statusTextWidth = ceilf(statusBounds.size.width);
+		CGFloat statusTextHeight = ceilf(statusBounds.size.height);
+		CGFloat statusPaddingX = 6.f;
+		CGFloat statusPaddingY = 2.f;
+		CGFloat statusSquareSide = ceilf(MAX(statusTextWidth + statusPaddingX * 2.f, statusTextHeight + statusPaddingY * 2.f));
+		statusSquareSide = fminf(statusSquareSide, fminf(drawRect.size.width, drawRect.size.height));
+		
+		statusBackgroundRect = CGRectMake(CGRectGetMidX(drawRect) - statusSquareSide * 0.5f,
+										  CGRectGetMaxY(drawRect) - statusSquareSide,
+										  statusSquareSide,
+										  statusSquareSide);
+		statusTextRect = CGRectMake(CGRectGetMinX(statusBackgroundRect),
+									CGRectGetMidY(statusBackgroundRect) - statusTextHeight * 0.5f,
+									CGRectGetWidth(statusBackgroundRect),
+									statusTextHeight);
+		mainTextRect.size.height = fmaxf(0.f, drawRect.size.height - statusSquareSide - kSpace);
+	}
 	
 	CGRect boundingRect = [self.attrString boundingRectWithSize:CGSizeMake(mainTextRect.size.width, CGFLOAT_MAX)
 														options:NSStringDrawingUsesLineFragmentOrigin
@@ -219,9 +225,11 @@ static NSString * const kDebugStatusText = @"PAID";
 
 	[self.attrString drawWithRect:mainTextRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin context:nil];
 
-	[[UIColor blackColor] setFill];
-	UIRectFill(statusBackgroundRect);
-	[self.statusAttrString drawWithRect:statusTextRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin context:nil];
+	if (self.statusAttrString.length > 0) {
+		[[UIColor blackColor] setFill];
+		UIRectFill(statusBackgroundRect);
+		[self.statusAttrString drawWithRect:statusTextRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin context:nil];
+	}
 }
 
 #pragma mark - NSCopying protocol
