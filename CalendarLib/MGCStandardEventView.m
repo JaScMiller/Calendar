@@ -31,7 +31,6 @@
 #import "MGCStandardEventView.h"
 
 static CGFloat kSpace = 2;
-static NSString * const kDebugStatusText = @"PAID";
 
 
 @interface MGCStandardEventView ()
@@ -106,12 +105,13 @@ static NSString * const kDebugStatusText = @"PAID";
 	
 	self.attrString = as;
 	self.statusAttrString = nil;
-	if (kDebugStatusText.length > 0) {
+	NSString *statusText = [self.statusString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	if (statusText.length > 0) {
 		NSMutableParagraphStyle *statusStyle = [NSMutableParagraphStyle new];
 		statusStyle.alignment = NSTextAlignmentCenter;
 		statusStyle.lineBreakMode = NSLineBreakByTruncatingTail;
 		
-		self.statusAttrString = [[NSAttributedString alloc] initWithString:kDebugStatusText attributes:@{
+		self.statusAttrString = [[NSAttributedString alloc] initWithString:statusText attributes:@{
 			NSFontAttributeName: boldFont ?: self.font,
 			NSForegroundColorAttributeName: [UIColor whiteColor],
 			NSParagraphStyleAttributeName: statusStyle
