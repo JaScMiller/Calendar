@@ -58,6 +58,9 @@ typedef NS_OPTIONS(NSUInteger, MGCStandardEventViewStyle) {
 /*! Detail - displayed with a smaller font and right aligned. */
 @property (nonatomic, copy)	NSString *detail;
 
+/*! Status of the event - displayed at the bottom of the event view. */
+@property (nonatomic, copy)	NSString *statusString;
+
 /*! The color is used for background or text, depending on the style. */
 @property (nonatomic) UIColor *color;
 
