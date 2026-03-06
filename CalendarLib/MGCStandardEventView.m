@@ -200,25 +200,27 @@ static CGFloat kSpace = 2;
 	CGRect statusBackgroundRect = CGRectZero;
 	CGRect statusTextRect = CGRectZero;
 	if (self.statusAttrString.length > 0) {
+		CGFloat statusHorizontalMargin = 2.f;
+		CGFloat statusTextPaddingX = 4.f;
+		CGFloat statusTextPaddingY = 2.f;
+
 		CGRect statusBounds = [self.statusAttrString boundingRectWithSize:CGSizeMake(drawRect.size.width, CGFLOAT_MAX)
 																 options:NSStringDrawingUsesLineFragmentOrigin
 																 context:nil];
-		CGFloat statusTextWidth = ceilf(statusBounds.size.width);
 		CGFloat statusTextHeight = ceilf(statusBounds.size.height);
-		CGFloat statusPaddingX = 6.f;
-		CGFloat statusPaddingY = 2.f;
-		CGFloat statusSquareSide = ceilf(MAX(statusTextWidth + statusPaddingX * 2.f, statusTextHeight + statusPaddingY * 2.f));
-		statusSquareSide = fminf(statusSquareSide, fminf(drawRect.size.width, drawRect.size.height));
-		
-		statusBackgroundRect = CGRectMake(CGRectGetMidX(drawRect) - statusSquareSide * 0.5f,
-										  CGRectGetMaxY(drawRect) - statusSquareSide,
-										  statusSquareSide,
-										  statusSquareSide);
-		statusTextRect = CGRectMake(CGRectGetMinX(statusBackgroundRect),
+		CGFloat statusHeight = ceilf(statusTextHeight + statusTextPaddingY * 2.f);
+		statusHeight = fminf(statusHeight, drawRect.size.height);
+		CGFloat statusWidth = fmaxf(0.f, drawRect.size.width - statusHorizontalMargin * 2.f);
+
+		statusBackgroundRect = CGRectMake(CGRectGetMinX(drawRect) + statusHorizontalMargin,
+										  CGRectGetMaxY(drawRect) - statusHeight,
+										  statusWidth,
+										  statusHeight);
+		statusTextRect = CGRectMake(CGRectGetMinX(statusBackgroundRect) + statusTextPaddingX,
 									CGRectGetMidY(statusBackgroundRect) - statusTextHeight * 0.5f,
-									CGRectGetWidth(statusBackgroundRect),
+									fmaxf(0.f, CGRectGetWidth(statusBackgroundRect) - statusTextPaddingX * 2.f),
 									statusTextHeight);
-		mainTextRect.size.height = fmaxf(0.f, drawRect.size.height - statusSquareSide - kSpace);
+		mainTextRect.size.height = fmaxf(0.f, drawRect.size.height - statusHeight - kSpace);
 	}
 	
 	CGRect boundingRect = [self.attrString boundingRectWithSize:CGSizeMake(mainTextRect.size.width, CGFLOAT_MAX)
@@ -233,7 +235,8 @@ static CGFloat kSpace = 2;
 
 	if (self.statusAttrString.length > 0) {
 		[(self.statusBadgeColor ?: [UIColor blackColor]) setFill];
-		UIRectFill(statusBackgroundRect);
+		UIBezierPath *statusBackgroundPath = [UIBezierPath bezierPathWithRoundedRect:statusBackgroundRect cornerRadius:CGRectGetHeight(statusBackgroundRect) * 0.5f];
+		[statusBackgroundPath fill];
 		[self.statusAttrString drawWithRect:statusTextRect options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin context:nil];
 	}
 }
