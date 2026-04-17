@@ -43,13 +43,19 @@
     return self;
 }
 
+- (void)setVisibleHeight:(CGFloat)visibleHeight
+{
+	_visibleHeight = visibleHeight;
+	_eventView.visibleHeight = visibleHeight;
+}
+
 - (void)setEventView:(MGCEventView*)eventView
 {
 	if (eventView != _eventView) {
 		[self.eventView removeFromSuperview];
 		[self.contentView addSubview:eventView];
 		[self setNeedsLayout];
-		
+
 		_eventView = eventView;
 		_eventView.visibleHeight = self.visibleHeight;
 	}
